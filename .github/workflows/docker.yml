@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: MLOps CI/CD
 
 on:
   push:
@@ -6,7 +6,28 @@ on:
       - main
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          pytest
+
   docker:
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
@@ -21,8 +42,10 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mlops-docker-mvp:latest .
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/mlops-docker-mvp:latest .
 
       - name: Push Docker image
         run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/mlops-docker-mvp:latest
+          docker push \
+            ${{ secrets.DOCKERHUB_USERNAME }}/mlops-docker-mvp:latest
