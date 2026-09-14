@@ -2,12 +2,19 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from app.model import predict
+from app.drift import calculate_psi, drift_detected
+
 
 app = FastAPI(title="Dockerized ML API")
 
 
 class PredictionRequest(BaseModel):
     value: float
+
+
+class DriftRequest(BaseModel):
+    training_data: list[float]
+    production_data: list[float]
 
 
 @app.get("/health")
@@ -22,4 +29,17 @@ def prediction(request: PredictionRequest):
     return {
         "input": request.value,
         "prediction": result
+    }
+
+
+@app.post("/drift")
+def detect_drift(request: DriftRequest):
+    psi = calculate_psi(
+        request.training_data,
+        request.production_data
+    )
+
+    return {
+        "psi": psi,
+        "drift_detected": drift_detected(psi)
     }
