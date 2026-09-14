@@ -1,7 +1,9 @@
+from datetime import datetime, timezone
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from app.model import predict
+from app.model import MODEL_VERSION, predict
 from app.drift import calculate_psi, drift_detected
 
 
@@ -26,10 +28,14 @@ def health():
 def prediction(request: PredictionRequest):
     result = predict(request.value)
 
-    return {
+    prediction_log = {
         "input": request.value,
-        "prediction": result
+        "prediction": result,
+        "model_version": MODEL_VERSION,
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }
+
+    return prediction_log
 
 
 @app.post("/drift")

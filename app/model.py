@@ -1,6 +1,8 @@
 from sklearn.linear_model import LinearRegression
 import numpy as np
 
+MODEL_VERSION = "1.0.0"
+
 model = LinearRegression()
 
 X = np.array([[1], [2], [3], [4], [5]])
